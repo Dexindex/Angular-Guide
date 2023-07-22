@@ -205,7 +205,7 @@ users: any[] = [];
   }
 }
 3 - In The Same Last Created Compenant HTML We Show Our Results :
-<li *ngFor="let user of users">{{ user.name }}</li>
+<div *ngFor="let user of users">{{ user.name }}</div>
 // *---------------------------------------------------------------------------------------------------------//
 
 
