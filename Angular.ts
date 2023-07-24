@@ -209,71 +209,226 @@ users: any[] = [];
 // *---------------------------------------------------------------------------------------------------------//
 
 
+//? Pipe --------------------------------------------------------------------------------------------------------------//
+* - Pipes Is A Display Function Used To Manipulate Data To A Specific Format : // Syntax : {{var | pipe}}
+1 - String Pipes :
+
+var = "Hello world"
+{{var | lowercase}}                           -> hello world
+{{var | uppercase}}                           -> HELLO WORLD
+{{var | titlecase}}                           -> Hello World
+{{var | slice:s inc:e}} - {{var | slice:5:9}} -> wor
+
+2 - Json Pipe :
+var = {name:"hello",age:21}
+{{var | json}}  ->  {name:"hello",age:21}
+
+3 - Date Pipes (short-medium-long):
+var = new Date()
+{{var | date }}  ->  July 23,2023
+{{var | date:'short' }}  ->  7/23/23, 18:42 PM
+{{var | date:'shortTime' }}  -> 18:42 PM
+{{var | date:'shortDate' }}  ->  7/23/23
+
+4 - Number Pipe :
+number:'Integer char-lenght.Decimal char-lenght min-max'
+{{2.1574 | number:'2.2-3' }}  ->  02.15
+
+5 - Percentage Pipe :
+{{0.2 | percent }}  ->  20%
+
+6 - Currency Pipe :
+{{28 | currency }}  ->  $28
+{{20 | currency:'EUR' }}  ->  €20
+{{18 | currency:'EUR':'code' }}  ->  EUR18
+// *-------------------------------------------------------------------------------------------------------------------//
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//? Crud Operations With Angular -----------------------------------------------------------------//
-1 - In src\app\app.module.ts We Add Those Lines :
-import {HttpClientModule} from '@angular/common/http';
-import {FormsModule} from '@angular/forms';
-@NgModule ({
-    imports:[
-        HttpClientModule,
-        FormsModule
-    ]
-})
-
-2 - Then We Gonna Create A Service :
-ng g s services/nameS
-
-
-
-
-///////////  LIST  //////////
-// Notes : Click In The :Yellow Bulb To Auto import the modules
-
-3 - In src\app\services\nameS.service.ts We Add This inside the constructor(private http: HttpClient){} :
-ListI(){return this.http.get<Task[]>("http://localhost:5000/tasks")}
-
-
-4 - In src\app\components\nameS\nameS.components.ts We Add This inside the constructor(private taskService: TaskService){} :
-tasks: Task[]=[]
-getListI(){this.taskService.ListI().subscribe(tasks => this.tasks = tasks)}
-ngOnInit(){this.getListI()}
-
-5 - Then We Gonna Create An Interface :
-ng g i models/task
-
-we gonna open src\app\models\task.ts
-Then We Gonna Write on it those codes :
-export interface Task{
-    id?:number;
-    etc:etc...
+//? Form Validation ---------------------------------------------------------------------------------------------------//
+* - Form Validation Used To Filter And Sanitize And Control The Users Input Values :
+1 - We Create Our Form Normaly With HTML.
+2 - In Each Input We Add Those As A Attributs `ngModel name='Example' #Example="ngModel"`
+3 - We Add The Validation Attributs Like `required minlength="" maxlength="" pattern="" `
+4 - After Input We Add The Field That Will Appear If Any Error Occured : {
+	<div class="style for error" *ngIf="Example.touched && !Example.valid"></div>
+}
+5 - Inside That Field We Add For Each Error A Block With The Message : {
+	<div *ngIf="Example.errors.required">This Field Is Required</div>
+	<div *ngIf="Example.errors.minlength">Minimum length Is 8 Charachters</div>
+	<div *ngIf="Example.errors.maxlength">Maximum length Is 24 Charachters</div>
+	<div *ngIf="Example.errors.pattern">The Password Should Contain A-Z a-z 1-9</div>
 }
 
-6 - In Html Component :
-<div *ngFor="let task of tasks">{{task.name}}</div>
+6 - To Add A Specific Styling Error To The Input In Both Invalid And Valid We Write Some Styling To The Main css File :
+// Assuming We Add `form-control` class to each input :
+
+Invalid :
+.form-control.ng-touched.ng-invalid{
+	border-bottom:2px solid red;
+}
+
+Valid :
+.form-control.ng-valid{
+	border-bottom:2px solid green;
+}
+
+// *-------------------------------------------------------------------------------------------------------------------//
 
 
-//? ----------------------------------------------------------------------------------------------//
+
+//? Binding Form Data To A Model --------------------------------------------------------------------------------------//
+* - Binding Form Data To A Model Allowing Form To Sent The Input Values After Submitting To Save it 
+Or Whatever You Gonna use it.
+
+1 - Create A New class inside models Folder:
+ng g class models/classN
+// Inside This classN.ts
+export class classN{
+	id:number;email:string; .....
+}
+
+2 - Initialising The Class In Form Component TS File :
+// After Export class ...
+public classN = ClassNModel;
+// Inside constructor 
+this.classN=new ClassNModel()
+
+3 - Setting The HTML File To Send Datas :
+// Inside Form Tag:
+#form="ngForm" (submit)="SubmitFunction(form)"
+
+// Make Sure That The Form Has A submit Button
+
+
+4 - Inside Each Input Tag :
+[(ngModel)]="classN.email"
+
+5 - Making The Capture Function In Form Component TS File To Procces The Values :
+// Inside constructor After ngOnInit
+SubmitFunction(form:NgForm){
+	console.log(this.classN)
+// Other Proccessing Like Sending Those Values To Database
+}
+// *-------------------------------------------------------------------------------------------------------------------//
+
+
+
+//? Password Confirmation ---------------------------------------------------------------------------------------------//
+* - Password Confirmation Used To Compare The Both Password To Achieve User Password Memoration:
+1 - Assuming That We Have Already Made A Password input Like Those Exapmles We Make Before .
+1 - In Confirm Password Input We Add Those As A Attributs `#pwCon="ngModel" [(ngModel)]="conPw" pattern={{classN.password}} required`
+3 - We Add The Validation Attributs Like `required minlength="" maxlength="" pattern="" `
+4 - After Input We Add The Field That Will Appear If Any Error Occured Like(Form Validation - 5)
+}
+
+
+// *-------------------------------------------------------------------------------------------------------------------//
+
+
+
+
+//? Http Get Data From API ---------------------------------------------------------------------------------------------//
+* - We Use Http Get Request To Fetch Data From An api or A Database To Show Them In Our Page.
+1 - Create A New Service : ng g s services/nameS
+2 - In app.module.ts We Add HttpClientModule in Imports 
+3 - Inside This Service TS File We instantiate And Inject HttpClientModule :
+	constructor(private http : HttpClient){}
+4 - We Set Our api (json-file,php list page encoded with json,json placeholder,web scraped Object...)
+5 - Inside constructor we Gonna Create a Function to Get those fetched datas :
+	// After constructor(...){}
+	public getDataHttp(){
+		let datas = this.http.get<any>("Link Of api ,Example : https://www.localhost.com/users/list.php")
+		return datas
+	}
+6 - In Component We Gonna Show The Results In It :
+// After export class { ,We create A Empty Variable To Store Those Datas :
+	public datasTable = []
+
+// Inject and instantiate Our Created Service inside constructor:
+	,private nameS : NameSService
+
+// Inside Export Class ,We create The Function That subscribe to http Request and store its Datas to datasTable[] :
+getApiData(){
+	this.nameS.getDataHttp().subscribe(
+	result => {this.datasTable = result;console.log(result)}
+	)
+}
+
+// Inside ngOnInit(){ We Call This Function :
+this.getApiData()
+
+7 - Show The Results In Compenent HTML File :
+<div *ngFor="let data of datasTable">{{data.name}}</div>
+
+// *-------------------------------------------------------------------------------------------------------------------//
+
+
+
+
+//? Behavior Subject (Data from Component to Component) ------------------------------------------------------//
+Used for sharing data between components, and it can be particularly useful for scenarios like searching.
+1 - Create Two Components: SenderComponent and ReceiverComponent.
+2 - In the SenderComponent, create a form to send data. You can add form validation as needed.
+3 - Add the submit event to the form tag to trigger the sendValue(form) function. Also,
+add the reference #form="ngForm" to the form tag.
+4 - Add the name="inputValue" and [(ngModel)]="inputValue" attributes to the input field(s) in the SenderComponent.
+ This will bind the input value to the inputValue variable in the component.
+5 - Create a new service to return and store the value using BehaviorSubject:
+// Create a new variable to instantiate the BehaviorSubject before the constructor:
+inputValueSubject = new BehaviorSubject<string>("");
+// Create a function to set the value after the constructor:
+setValue(inputValue: string) {
+this.inputValueSubject.next(inputValue);
+}
+6 - In the SenderComponent's TS file, process the values submitted by the form:
+// After constructor import your service
+import { YourService } from '../services/your-service';
+// Inside the constructor, inject the service:
+constructor(private yourService: YourService) {}
+sendValue(form: NgForm) {
+  this.yourService.setValue(this.inputValue);
+}
+7 - In the ReceiverComponent, subscribe to the BehaviorSubject to receive the data sent from the SenderComponent:
+// After constructor import your service
+import { YourService } from '../services/your-service';
+// Inside the constructor, inject the service:
+constructor(private yourService: YourService) {}
+// Inside ngOnInit, subscribe to the BehaviorSubject:
+ngOnInit() {
+  this.yourService.inputValueSubject.subscribe((value) => {
+    // Do something with the received value in the ReceiverComponent
+    console.log('Received value:', value);
+  });
+}
+Now, when you submit the form in the SenderComponent, the inputValue will be sent to the ReceiverComponent through the BehaviorSubject, and the ReceiverComponent will receive and log the value.
+
+This way, you have established communication between components using BehaviorSubject, allowing you to share data between them efficiently.
+//----------------------------------------------------------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
+
+//? Vocabulary --------------------------------------------------------------------------------------------------------------//
+
+1 - Injection : When We Create a Method inside constructor we call it Injection -- constructor(private %userService%)
+2 - Instantiation : When We Inject A Service Inside Class VScode Automaticly show the service name this Called Instantiation
+3 - Interface : Is Those (any,number...) , So If We Want To get some infos from server we make an Interface.
+	Example : ng g i models/nameInter -> export interface nameInter {id?:number..} -> arr: nameInter[] = [];
+
+
+
+// *-----------------------------------------------------------------------------------------------------------------------//
+
+
+
+
+
+
+
+
